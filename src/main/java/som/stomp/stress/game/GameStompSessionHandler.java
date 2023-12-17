@@ -6,9 +6,7 @@ import som.stomp.stress.game.dto.GameStompResponse;
 import som.stomp.stress.test.dto.StompResponse;
 
 import java.lang.reflect.Type;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class GameStompSessionHandler extends StompSessionHandlerAdapter {
@@ -20,10 +18,13 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
     private String playerId;
     private Boolean isEnd;
 
+    private YutResultConverter yutResultConverter;
+
     public GameStompSessionHandler(String gameRoomId, String playerId) {
         this.gameRoomId = gameRoomId;
         this.playerId = playerId;
         this.isEnd = false;
+        yutResultConverter = new YutResultConverter();
     }
 
     @Override
@@ -34,7 +35,11 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         this.session = session;
 
 //        session.subscribe("/topic/test/", new TestStompConnect());
-        session.subscribe("/topic/game/room/"+gameRoomId, new GameStartResponse());
+        session.subscribe("/topic/game/room/"+gameRoomId, new GameStartHandler());
+        session.subscribe("/topic/game/throw/"+gameRoomId, new YutThrowResultHandler());
+        session.subscribe("/topic/game/"+gameRoomId+"/mal", new MalsNextPositionHandler());
+        session.subscribe("/topic/game/"+gameRoomId+"/mal/move", new MoveMalHandler());
+        session.subscribe("/topic/game/"+gameRoomId+"/end", new GameOverHandler());
 
 //        test();
         enterGame();
@@ -61,16 +66,66 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
     }
 
     public void enterGame(){
-        log.info("게임 스톰프 핸들러에서: {}", gameRoomId);
+        log.info("게임 입장: {}", gameRoomId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("messageType", "WAIT");
         params.put("room_id", gameRoomId);
-        params.put("sender", playerId == "1P" ? "가나" : "다라");
+        params.put("sender", Objects.equals(playerId, "1P") ? "가나" : "다라");
         params.put("player_id", playerId);
         params.put("profileURL_1P", "이미지주소");
 
         session.send("/app/game/message", params);
+    }
+
+    public void throwYut(){
+        sleepRandom();
+        log.info("[{}] 윷 던지기: {}", playerId, gameRoomId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("messageType", "THROW");
+        params.put("room_id", gameRoomId);
+        params.put("player_id", playerId);
+
+        session.send("/app/game/throw", params);
+    }
+
+    public void getMalsNextPosition(String yutResult){
+        sleepRandom();
+        log.info("[{}] 말 이동 가능한 위치 조회: {}", playerId, gameRoomId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_id", 1L);
+        params.put("player_id", playerId);
+        params.put("game_id", gameRoomId);
+        params.put("yut_result", yutResult);
+
+        session.send("/app/game/mal", params);
+    }
+
+    public void moveMal(int malId, String yutResult){
+        sleepRandom();
+        log.info("[{}] 말({}) 이동하기: {}", playerId, malId, gameRoomId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_id", 1L);
+        params.put("player_id", playerId);
+        params.put("game_id", gameRoomId);
+        params.put("mal_id", malId);
+        params.put("yut_result", yutResult);
+
+        session.send("/app/game/mal/move", params);
+    }
+
+    public void getScore(){
+        sleepRandom();
+        log.info("[{}] 점수 조회하기: {}", playerId, gameRoomId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("player_id", playerId);
+        params.put("game_id", gameRoomId);
+
+        session.send("/app/game/score", params);
     }
 
     private class TestStompConnect implements StompFrameHandler {
@@ -87,7 +142,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
     }
 
     // 게임 시작
-    private class GameStartResponse implements StompFrameHandler{
+    private class GameStartHandler implements StompFrameHandler{
         @Override
         public Type getPayloadType(StompHeaders headers) {
             return GameStompResponse.GameStartDTO.class;
@@ -97,15 +152,121 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         public void handleFrame(StompHeaders headers, Object payload) {
             GameStompResponse.GameStartDTO response = (GameStompResponse.GameStartDTO) payload;
             if(playerId.contains(response.getPlayerId())){
-                isEnd = true;
-                log.info("게임 시작 응답: {}", response.getSender());
+                log.info("[{}] 게임 시작 응답: {}", playerId, response.getSender());
+
+                // 1P 먼저 윷 던져서 게임 시작!
+                if(playerId.equals("1P")){
+                    throwYut();
+                }
             }
         }
     }
 
-    private class
+    // 윷 던진 결과
+    private class YutThrowResultHandler implements StompFrameHandler{
+        @Override
+        public Type getPayloadType(StompHeaders headers) {
+            return GameStompResponse.YutThrowResultDTO.class;
+        }
+
+        @Override
+        public void handleFrame(StompHeaders headers, Object payload) {
+            GameStompResponse.YutThrowResultDTO response = (GameStompResponse.YutThrowResultDTO) payload;
+            if(playerId.contains(response.getPlayerId())){
+                int yutResultNum = Integer.parseInt(response.getYut());
+                String yutResult = yutResultConverter.intToString(yutResultNum);
+                log.info("[{}] 윷 던진 결과 응답: {}-{}", playerId, yutResult, yutResultNum);
+
+                getMalsNextPosition(yutResult);
+            }
+        }
+    }
+
+    // 말 이동 위치 조회
+    private class MalsNextPositionHandler implements StompFrameHandler{
+        @Override
+        public Type getPayloadType(StompHeaders headers) {
+            return GameStompResponse.MalsNextPositionDTO.class;
+        }
+
+        @Override
+        public void handleFrame(StompHeaders headers, Object payload) {
+            GameStompResponse.MalsNextPositionDTO response = (GameStompResponse.MalsNextPositionDTO) payload;
+            if(playerId.contains(response.getPlayerId())){
+                log.info("[{}] 말 이동 위치 조회 응답: {}", playerId, gameRoomId);
+
+                List<GameStompResponse.MalMoveInfo> moveInfoList = response.getMalList();
+                if(!moveInfoList.isEmpty()){ // 기존의 윷판에 있는 말부터 움직이기
+                    moveMal(moveInfoList.get(0).getMalId(), response.getYutResult());
+                }
+                else { // 새로운 말 움직이기
+                    if(response.getNewMalId() == -1){
+                        // 더이상 움직일 수 있는 말이 없음. 즉 게임 끝
+                        // 점수 조회.
+                        getScore();
+                        return;
+                    }
+                    moveMal(response.getNewMalId(), response.getYutResult());
+                }
+            }
+        }
+    }
+
+    // 말 이동하기
+    private class MoveMalHandler implements StompFrameHandler{
+        @Override
+        public Type getPayloadType(StompHeaders headers) {
+            return GameStompResponse.MoveMalDTO.class;
+        }
+
+        @Override
+        public void handleFrame(StompHeaders headers, Object payload) {
+            GameStompResponse.MoveMalDTO response = (GameStompResponse.MoveMalDTO) payload;
+            if(playerId.contains(response.getPlayerId())){{
+                log.info("[{}] 말 이동하기 응답: id:{}, 위치:{}", playerId, response.getMalId(), response.getNextPosition());
+            }}
+            else {
+                // 이제 내차례
+                throwYut();
+            }
+        }
+    }
+
+
+
+    // 게임 종료
+    private class GameOverHandler implements StompFrameHandler{
+        @Override
+        public Type getPayloadType(StompHeaders headers) {
+            return GameStompResponse.GameOverDTO.class;
+        }
+
+        @Override
+        public void handleFrame(StompHeaders headers, Object payload) {
+            GameStompResponse.GameOverDTO response = (GameStompResponse.GameOverDTO) payload;
+            isEnd = true;
+            log.info("[{}] 게임 종료-{}: {}, 승자: {}", playerId, isEnd, gameRoomId, response.getWinner());
+        }
+    }
+
+    private void sleep(Long mills){
+        try {
+            Thread.sleep(mills);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void sleepRandom(){
+        int rand = (int)(Math.random() * 2) + 1;
+        try {
+            Thread.sleep(rand * 1000);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
     public Boolean isEnd() {
-        return isEnd;
+        return this.isEnd;
     }
 }

@@ -12,6 +12,7 @@ public class GameThread extends Thread{
         GameApiConnect gameApiConnect = new GameApiConnect();
 
         gameApiConnect.createGame("가나", "COUPLE", "ON");
+        gameApiConnect.updateGameRoomStatus(true);
 
         GameStompConnect gameStompConnect1 = new GameStompConnect(gameApiConnect.getGameRoomId(), "1P");
         gameStompConnect1.start();
@@ -19,13 +20,15 @@ public class GameThread extends Thread{
         gameStompConnect2.start();
 
         while (!gameStompConnect1.isEnd() || !gameStompConnect2.isEnd()){
-            try {
-                Thread.sleep(500);
+            try{
+                log.info("1P: {}, 2P: {}", gameStompConnect1.isEnd(), gameStompConnect2.isEnd());
+                Thread.sleep(10000);
             } catch (Exception e){
                 e.printStackTrace();
             }
         }
 
+        log.info("1P: {}, 2P: {}", gameStompConnect1.isEnd(), gameStompConnect2.isEnd());
         gameApiConnect.deleteGame();
 
         log.info("thread end");

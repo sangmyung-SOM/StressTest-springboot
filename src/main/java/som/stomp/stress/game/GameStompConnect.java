@@ -9,7 +9,7 @@ import som.stomp.stress.test.TestStompSessionHandler;
 
 public class GameStompConnect {
 
-    private final String baseUrl = "ws://localhost:8080/ws";
+    private final String baseUrl = "ws://3.37.84.188:8080/ws";
     private final WebSocketStompClient stompClient;
     private final StompSessionHandler stompSessionHandler;
     private String gameRoomId;

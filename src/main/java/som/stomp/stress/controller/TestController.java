@@ -56,4 +56,12 @@ public class TestController {
         System.out.println("동기 확인");
     }
 
+    @GetMapping("/5")
+    public void test5(){
+        for(int i=0; i<100; i++){
+            GameThread gameThread = new GameThread();
+            gameThread.start();
+        }
+    }
+
 }

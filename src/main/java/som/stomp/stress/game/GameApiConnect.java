@@ -29,7 +29,7 @@ public class GameApiConnect {
         // webClient 기본 설정
         this.webClient = WebClient
                         .builder()
-                        .baseUrl("http://localhost:8080")
+                        .baseUrl("http://3.37.84.188:8080")
                         .build();
     }
 
@@ -81,21 +81,21 @@ public class GameApiConnect {
             throw new RuntimeException("게임방이 생성되어있지 않음!");
         }
 
-        StringBuilder urlStringBuilder = new StringBuilder("/game/room?")
-                .append("roomId=")
+        StringBuilder urlStringBuilder = new StringBuilder("/game/room/")
                 .append(gameRoomId)
-                .append("&state=")
+                .append("/update")
+                .append("?state=")
                 .append(state);
 
         // api 요청
-        ResponseEntity<Map> response = webClient
+        Boolean response = webClient
                 .patch()
                 .uri(urlStringBuilder.toString())
                 .retrieve()
-                .toEntity(Map.class)
+                .bodyToMono(Boolean.class)
                 .block();
 
         // 결과 확인
-        log.info("게임방 상태 업데이트 응답: {}", response.getStatusCode().toString());
+        log.info("게임방 상태 업데이트 응답: {}", response);
     }
 }

@@ -65,7 +65,7 @@ public class GameStompResponse {
 
     @NoArgsConstructor
     @Getter
-    public class MalMoveInfo{
+    public static class MalMoveInfo{
         private int malId;
         private Boolean isEn;
         private int point;
@@ -75,7 +75,7 @@ public class GameStompResponse {
 
     @NoArgsConstructor
     @Getter
-    public class MoveMalDTO{
+    public static class MoveMalDTO{
         private Long userId;
         private String playerId;
         private int malId;
