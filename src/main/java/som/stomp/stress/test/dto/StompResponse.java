@@ -1,4 +1,4 @@
-package som.stomp.stress.dto;
+package som.stomp.stress.test.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

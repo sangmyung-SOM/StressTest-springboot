@@ -13,7 +13,7 @@ public class StompTest {
 
         WebSocketClient webSocketClient = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
-        StompSessionHandler stompSessionHandler =  new SomStompSessionHandler();
+        StompSessionHandler stompSessionHandler =  new TestStompSessionHandler();
         Object[] urlVariables = {};
 
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());

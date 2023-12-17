@@ -3,12 +3,11 @@ package som.stomp.stress.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import som.stomp.stress.test.SomStompSessionHandler;
+import som.stomp.stress.test.TestStompSessionHandler;
 
 @Configuration
 public class ClientWebSocketStompConfig {
@@ -37,6 +36,6 @@ public class ClientWebSocketStompConfig {
     }
     @Bean
     public StompSessionHandler stompSessionHandler() {
-        return new SomStompSessionHandler();
+        return new TestStompSessionHandler();
     }
 }

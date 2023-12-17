@@ -2,7 +2,7 @@ package som.stomp.stress.test;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.stomp.*;
-import som.stomp.stress.dto.StompResponse;
+import som.stomp.stress.test.dto.StompResponse;
 
 import java.lang.reflect.Type;
 import java.util.Date;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class SomStompSessionHandler extends StompSessionHandlerAdapter {
+public class TestStompSessionHandler extends StompSessionHandlerAdapter {
 
 //    https://velog.io/@limsubin/STOMP-%EA%B5%AC%EC%A1%B0-%EB%B0%8F-Spring-Websocket-Client-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EC%9E%90
 
