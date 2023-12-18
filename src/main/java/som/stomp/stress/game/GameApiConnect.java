@@ -29,7 +29,7 @@ public class GameApiConnect {
         // webClient 기본 설정
         this.webClient = WebClient
                         .builder()
-                        .baseUrl("http://3.37.84.188:8080")
+                        .baseUrl(GameConst.urlApi)
                         .build();
     }
 

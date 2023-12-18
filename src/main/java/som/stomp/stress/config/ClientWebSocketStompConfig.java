@@ -7,6 +7,8 @@ import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
+import som.stomp.stress.game.GameConst;
+import som.stomp.stress.game.GameThread;
 import som.stomp.stress.test.TestStompSessionHandler;
 
 @Configuration
@@ -23,7 +25,7 @@ public class ClientWebSocketStompConfig {
 
 
         Object[] urlVariables = {};
-        String url = "ws://localhost:8080/ws";
+        String url = GameConst.urlStomp;
         webSocketClient.connect(url, null, stompSessionHandler, urlVariables);
 
         return webSocketClient;

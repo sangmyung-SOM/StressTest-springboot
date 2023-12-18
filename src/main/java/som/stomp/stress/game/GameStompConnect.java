@@ -8,8 +8,6 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import som.stomp.stress.test.TestStompSessionHandler;
 
 public class GameStompConnect {
-
-    private final String baseUrl = "ws://3.37.84.188:8080/ws";
     private final WebSocketStompClient stompClient;
     private final StompSessionHandler stompSessionHandler;
     private String gameRoomId;
@@ -29,7 +27,7 @@ public class GameStompConnect {
         Object[] urlVariables = {};
 
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
-        stompClient.connect(baseUrl, null, stompSessionHandler, urlVariables);
+        stompClient.connect(GameConst.urlStomp, null, stompSessionHandler, urlVariables);
     }
 
     public Boolean isEnd(){

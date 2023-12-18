@@ -64,4 +64,12 @@ public class TestController {
         }
     }
 
+    @GetMapping("/6")
+    public void test6(){
+        for(int i=0; i<400; i++){
+            GameThread gameThread = new GameThread();
+            gameThread.start();
+        }
+    }
+
 }

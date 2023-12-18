@@ -18,13 +18,11 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
     private String playerId;
     private Boolean isEnd;
 
-    private YutResultConverter yutResultConverter;
 
     public GameStompSessionHandler(String gameRoomId, String playerId) {
         this.gameRoomId = gameRoomId;
         this.playerId = playerId;
         this.isEnd = false;
-        yutResultConverter = new YutResultConverter();
     }
 
     @Override
@@ -173,10 +171,12 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         public void handleFrame(StompHeaders headers, Object payload) {
             GameStompResponse.YutThrowResultDTO response = (GameStompResponse.YutThrowResultDTO) payload;
             if(playerId.contains(response.getPlayerId())){
-                int yutResultNum = Integer.parseInt(response.getYut());
-                String yutResult = yutResultConverter.intToString(yutResultNum);
-                log.info("[{}] 윷 던진 결과 응답: {}-{}", playerId, yutResult, yutResultNum);
+                String yutResult = response.getYut();
+                if(!response.getType().equals("CATCH_MAL")){ // 다른 타입(THROW, ONE_MORE_THROW)일때는 숫자로 주는데, CATCH_MAL일땐 String으로 줘서..
+                    yutResult = YutResultConverter.intToString(yutResult);
+                }
 
+                log.info("[{}] 윷 던진 결과 응답: {}", playerId, yutResult);
                 getMalsNextPosition(yutResult);
             }
         }
