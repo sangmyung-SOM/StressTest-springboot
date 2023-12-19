@@ -172,7 +172,11 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
             GameStompResponse.YutThrowResultDTO response = (GameStompResponse.YutThrowResultDTO) payload;
             if(playerId.contains(response.getPlayerId())){
                 String yutResult = response.getYut();
-                if(!response.getType().equals("CATCH_MAL")){ // 다른 타입(THROW, ONE_MORE_THROW)일때는 숫자로 주는데, CATCH_MAL일땐 String으로 줘서..
+                if(response.getType().equals("CATCH_MAL")){
+                    // 이건 윷 던진기(/game/throw)로 오는 응답이 아님. 말 이동하기 응답으로 예외적으로 오는 응답이라 테스트에서 제외.
+                    return;
+                }
+                else { // 다른 타입(THROW, ONE_MORE_THROW)일때는 숫자로 주는데, CATCH_MAL일땐 String으로 주기 때문도 있음.
                     yutResult = YutResultConverter.intToString(yutResult);
                 }
 
@@ -223,7 +227,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         public void handleFrame(StompHeaders headers, Object payload) {
             GameStompResponse.MoveMalDTO response = (GameStompResponse.MoveMalDTO) payload;
             if(playerId.contains(response.getPlayerId())){{
-                log.info("[{}] 말 이동하기 응답: id:{}, 위치:{}", playerId, response.getMalId(), response.getNextPosition());
+                log.info("[{}] 말 이동하기 응답: id:{}, 위치:{} {}", playerId, response.getMalId(), response.getNextPosition(), gameRoomId);
             }}
             else {
                 // 이제 내차례
