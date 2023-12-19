@@ -1,6 +1,6 @@
-package som.stomp.stress.game;
+package som.stomp.stress.base;
 
-public class GameConst {
+public class BaseData {
 
 //    public static String urlApi = "http://localhost:8080";
     public static String urlApi = "http://3.37.84.188:8080";

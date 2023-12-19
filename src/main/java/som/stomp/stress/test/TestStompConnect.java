@@ -6,7 +6,7 @@ import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
-public class StompTest {
+public class TestStompConnect {
 
     public void go(){
         String url = "ws://localhost:8080/ws";
@@ -18,9 +18,5 @@ public class StompTest {
 
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         stompClient.connect(url, null, stompSessionHandler, urlVariables);
-    }
-
-    public void disconnect(){
-
     }
 }

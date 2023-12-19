@@ -1,14 +1,18 @@
 package som.stomp.stress.game;
 
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@NoArgsConstructor
 public class GameThread extends Thread{
 
-    private GameCount gameCount;
+    private GameStatistics gameStatistics;
+    private GameStompConnect player1;
+    private GameStompConnect player2;
 
-    public GameThread(GameCount gameCount){
-        this.gameCount = gameCount;
+    public GameThread(GameStatistics gameStatistics){
+        this.gameStatistics = gameStatistics;
     }
 
     @Override
@@ -17,27 +21,31 @@ public class GameThread extends Thread{
 
         GameApiConnect gameApiConnect = new GameApiConnect();
 
+        // 게임 생성
         gameApiConnect.createGame("가나", "COUPLE", "ON");
         gameApiConnect.updateGameRoomStatus(true);
+        if(gameStatistics != null){
+            gameStatistics.createGame();
+        }
 
-        GameStompConnect gameStompConnect1 = new GameStompConnect(gameApiConnect.getGameRoomId(), "1P", this);
-        gameStompConnect1.start();
-        GameStompConnect gameStompConnect2 = new GameStompConnect(gameApiConnect.getGameRoomId(), "2P", this);
-        gameStompConnect2.start();
-
-//        while (!gameStompConnect1.isEnd() || !gameStompConnect2.isEnd()){
-//            try{
-//                log.info("1P: {}, 2P: {}", gameStompConnect1.isEnd(), gameStompConnect2.isEnd());
-//                Thread.sleep(10000);
-//            } catch (Exception e){
-//                e.printStackTrace();
-//            }
-//        }
+        // 플레이어 2명 생성 & 게임 시작
+        try{
+            player1 = new GameStompConnect(gameApiConnect.getGameRoomId(), "1P", this);
+            player1.start();
+            player2 = new GameStompConnect(gameApiConnect.getGameRoomId(), "2P", this);
+            player2.start();
+        } catch (ConnectionException e){
+            // 게임 연결 실패시 게임 삭제
+            gameApiConnect.deleteGame();
+        } catch (Exception e){
+            e.printStackTrace();
+            gameApiConnect.deleteGame();
+        }
 
         while (true){
-            if(!gameStompConnect1.isEnd() || !gameStompConnect2.isEnd()){
+            if(!player1.isEnd() || !player2.isEnd()){
                 try {
-                    log.info("아직 게임이 끝나지 않음. 1P: {}, 2P: {}", gameStompConnect1.isEnd(), gameStompConnect2.isEnd());
+                    log.info("아직 게임이 끝나지 않음. 1P: {}, 2P: {}", player1.isEnd(), player2.isEnd());
                     wait();
                 } catch (Exception e){
                     e.printStackTrace();
@@ -48,14 +56,20 @@ public class GameThread extends Thread{
             }
         }
 
-        log.info("1P: {}, 2P: {}", gameStompConnect1.isEnd(), gameStompConnect2.isEnd());
+        // 게임 끝 & 게임 삭제
+        log.info("[게임끝] 1P: {}, 2P: {}", player1.isEnd(), player2.isEnd());
         gameApiConnect.deleteGame();
-        gameCount.gameOver();
+        if(gameStatistics != null){
+            gameStatistics.gameOver();
+        }
 
         log.info("thread end");
     }
 
-    public synchronized void notifyEndGame(){
+    /**
+     * 게임이 끝났음을 알려주기
+     */
+    public synchronized void notifyGameEnd(){
         notify();
     }
 }

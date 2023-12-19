@@ -7,8 +7,7 @@ import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import som.stomp.stress.game.GameConst;
-import som.stomp.stress.game.GameThread;
+import som.stomp.stress.base.BaseData;
 import som.stomp.stress.test.TestStompSessionHandler;
 
 @Configuration
@@ -25,7 +24,7 @@ public class ClientWebSocketStompConfig {
 
 
         Object[] urlVariables = {};
-        String url = GameConst.urlStomp;
+        String url = BaseData.urlStomp;
         webSocketClient.connect(url, null, stompSessionHandler, urlVariables);
 
         return webSocketClient;

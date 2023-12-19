@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 public class GameRoomResponse {
 
+    /**
+     * 게임방 생성하기
+     */
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter

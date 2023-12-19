@@ -5,13 +5,13 @@ import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import som.stomp.stress.test.TestStompSessionHandler;
+import som.stomp.stress.base.BaseData;
 
 public class GameStompConnect {
     private final WebSocketStompClient stompClient;
     private final StompSessionHandler stompSessionHandler;
-    private String gameRoomId;
-    private String playerId;
+    private final String gameRoomId;
+    private final String playerId;
 
 
     public GameStompConnect(String gameRoomId, String playerId, GameThread gameThread){
@@ -27,9 +27,13 @@ public class GameStompConnect {
         Object[] urlVariables = {};
 
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
-        stompClient.connect(GameConst.urlStomp, null, stompSessionHandler, urlVariables);
+        stompClient.connectAsync(BaseData.urlStomp, null, stompSessionHandler, urlVariables);
     }
 
+    /**
+     * 게임이 끝났는지 여부
+     * @return if game end, return true
+     */
     public Boolean isEnd(){
         GameStompSessionHandler handler =  (GameStompSessionHandler) stompSessionHandler;
         return handler.isEnd();

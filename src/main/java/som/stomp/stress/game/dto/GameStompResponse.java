@@ -9,6 +9,9 @@ import java.util.List;
 
 public class GameStompResponse {
 
+    /**
+     * 게임 시작 응답
+     */
     @AllArgsConstructor
     @Getter
     @NoArgsConstructor
@@ -31,6 +34,9 @@ public class GameStompResponse {
         private String profileURL_2;
     }
 
+    /**
+     * 윷 던진 결과 응답
+     */
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
@@ -45,6 +51,9 @@ public class GameStompResponse {
         private String yut; // [0, 1, 2, 3, 4, 5]
     }
 
+    /**
+     * 게임 오버 응답
+     */
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
@@ -53,6 +62,9 @@ public class GameStompResponse {
         private String loser;
     }
 
+    /**
+     * 모든 말의 이동가능한 위치조회 응답
+     */
     @NoArgsConstructor
     @Getter
     public static class MalsNextPositionDTO{
@@ -73,6 +85,9 @@ public class GameStompResponse {
         private int nextPosition;
     }
 
+    /**
+     * 말 움직이기 응답
+     */
     @NoArgsConstructor
     @Getter
     public static class MoveMalDTO{

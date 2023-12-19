@@ -6,7 +6,6 @@ import lombok.Builder;
 
 public class GameStompRequest {
 
-
     public static class ThrowYutDTO{
         @JsonProperty("messageType")
         private String type;

@@ -29,42 +29,33 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
 
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-        // ...
         log.info("stomp 연결 완료: {}", session.isConnected());
 
         this.session = session;
 
-//        session.subscribe("/topic/test/", new TestStompConnect());
         session.subscribe("/topic/game/room/"+gameRoomId, new GameStartHandler());
         session.subscribe("/topic/game/throw/"+gameRoomId, new YutThrowResultHandler());
         session.subscribe("/topic/game/"+gameRoomId+"/mal", new MalsNextPositionHandler());
         session.subscribe("/topic/game/"+gameRoomId+"/mal/move", new MoveMalHandler());
         session.subscribe("/topic/game/"+gameRoomId+"/end", new GameOverHandler());
 
-//        test();
         enterGame();
     }
 
     @Override
     public void handleException(StompSession session, StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
-        System.out.println("SpringStompSessionHandler.handleException");
-        exception.printStackTrace();
+        throw new ConnectionException("SpringStompSessionHandler.handleException", exception);
     }
 
     @Override
     public void handleTransportError(StompSession session, Throwable exception) {
         // 이부분 서버 꺼져서 처음에 못붙거나, 붙었다가 서버 꺼지면 나옴 이때 재 커넥션 와일 돌리면 될꺼같음
-        System.out.println("SpringStompSessionHandler.handleTransportError");
-        exception.printStackTrace();
+        throw new ConnectionException("SpringStompSessionHandler.handleTransportError", exception);
     }
 
-    public void test(){
-        Date date = new Date();
-        Map<String, Object> params = new HashMap<>();
-        params.put("msg", "가나 테스트" + date.toString());
-        session.send("/app/test", params);
-    }
-
+    /**
+     * 게임 입장
+     */
     public void enterGame(){
         log.info("게임 입장: {}", gameRoomId);
 
@@ -78,6 +69,9 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         session.send("/app/game/message", params);
     }
 
+    /**
+     * 윷 던지기
+     */
     public void throwYut(){
         sleepRandom();
 //        log.info("[{}] 윷 던지기: {}", playerId, gameRoomId);
@@ -90,6 +84,10 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         session.send("/app/game/throw", params);
     }
 
+    /**
+     * 말 이동가능한 위치 조회
+     * @param yutResult 윷 결과
+     */
     public void getMalsNextPosition(String yutResult){
         sleepRandom();
 //        log.info("[{}] 말 이동 가능한 위치 조회: {}", playerId, gameRoomId);
@@ -103,6 +101,11 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         session.send("/app/game/mal", params);
     }
 
+    /**
+     * 말 움직이기
+     * @param malId 말 식별자
+     * @param yutResult 윷 결과
+     */
     public void moveMal(int malId, String yutResult){
         sleepRandom();
 //        log.info("[{}] 말({}) 이동하기: {}", playerId, malId, gameRoomId);
@@ -117,6 +120,9 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         session.send("/app/game/mal/move", params);
     }
 
+    /**
+     * 점수 조회
+     */
     public void getScore(){
         sleepRandom();
         log.info("[{}] 점수 조회하기: {}", playerId, gameRoomId);
@@ -127,21 +133,9 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
 
         session.send("/app/game/score", params);
     }
-
-    private class TestStompConnect implements StompFrameHandler {
-        @Override
-        public Type getPayloadType(StompHeaders headers) {
-            return StompResponse.TestDTO.class;
-        }
-
-        @Override
-        public void handleFrame(StompHeaders headers, Object payload) {
-            StompResponse.TestDTO respone = (StompResponse.TestDTO) payload;
-            log.info("응답 받음2: {}", respone.getMsg());
-        }
-    }
-
-    // 게임 시작
+    /**
+     * 게임 시작
+     */
     private class GameStartHandler implements StompFrameHandler{
         @Override
         public Type getPayloadType(StompHeaders headers) {
@@ -162,7 +156,9 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         }
     }
 
-    // 윷 던진 결과
+    /**
+     * 윷 던진 결과
+     */
     private class YutThrowResultHandler implements StompFrameHandler{
         @Override
         public Type getPayloadType(StompHeaders headers) {
@@ -188,7 +184,9 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         }
     }
 
-    // 말 이동 위치 조회
+    /**
+     * 말 이동 위치 조회
+     */
     private class MalsNextPositionHandler implements StompFrameHandler{
         @Override
         public Type getPayloadType(StompHeaders headers) {
@@ -206,8 +204,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
                     moveMal(moveInfoList.get(0).getMalId(), response.getYutResult());
                 }
                 else { // 새로운 말 움직이기
-                    if(response.getNewMalId() == -1){
-                        // 더이상 움직일 수 있는 말이 없음. 즉 게임 끝
+                    if(response.getNewMalId() == -1){ // 더이상 움직일 수 있는 말이 없음. 즉 게임 끝
                         // 점수 조회.
                         getScore();
                         return;
@@ -218,7 +215,9 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         }
     }
 
-    // 말 이동하기
+    /**
+     * 말 이동하기
+     */
     private class MoveMalHandler implements StompFrameHandler{
         @Override
         public Type getPayloadType(StompHeaders headers) {
@@ -238,9 +237,9 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         }
     }
 
-
-
-    // 게임 종료
+    /**
+     * 게임 종료
+     */
     private class GameOverHandler implements StompFrameHandler{
         @Override
         public Type getPayloadType(StompHeaders headers) {
@@ -251,7 +250,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         public void handleFrame(StompHeaders headers, Object payload) {
             GameStompResponse.GameOverDTO response = (GameStompResponse.GameOverDTO) payload;
             isEnd = true;
-            gameThread.notifyEndGame();
+            gameThread.notifyGameEnd();
 //            log.info("[{}] 게임 종료-{}: {}, 승자: {}", playerId, isEnd, gameRoomId, response.getWinner());
         }
     }
@@ -264,6 +263,9 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         }
     }
 
+    /**
+     * 랜덤한 시간만큼 sleep
+     */
     private void sleepRandom(){
         int rand = (int)(Math.random() * 2) + 1;
         try {
