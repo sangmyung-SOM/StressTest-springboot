@@ -17,12 +17,14 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
     private String gameRoomId;
     private String playerId;
     private Boolean isEnd;
+    private GameThread gameThread;
 
 
-    public GameStompSessionHandler(String gameRoomId, String playerId) {
+    public GameStompSessionHandler(String gameRoomId, String playerId, GameThread gameThread) {
         this.gameRoomId = gameRoomId;
         this.playerId = playerId;
         this.isEnd = false;
+        this.gameThread = gameThread;
     }
 
     @Override
@@ -78,7 +80,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
 
     public void throwYut(){
         sleepRandom();
-        log.info("[{}] 윷 던지기: {}", playerId, gameRoomId);
+//        log.info("[{}] 윷 던지기: {}", playerId, gameRoomId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("messageType", "THROW");
@@ -90,7 +92,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
 
     public void getMalsNextPosition(String yutResult){
         sleepRandom();
-        log.info("[{}] 말 이동 가능한 위치 조회: {}", playerId, gameRoomId);
+//        log.info("[{}] 말 이동 가능한 위치 조회: {}", playerId, gameRoomId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("user_id", 1L);
@@ -103,7 +105,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
 
     public void moveMal(int malId, String yutResult){
         sleepRandom();
-        log.info("[{}] 말({}) 이동하기: {}", playerId, malId, gameRoomId);
+//        log.info("[{}] 말({}) 이동하기: {}", playerId, malId, gameRoomId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("user_id", 1L);
@@ -180,7 +182,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
                     yutResult = YutResultConverter.intToString(yutResult);
                 }
 
-                log.info("[{}] 윷 던진 결과 응답: {}", playerId, yutResult);
+//                log.info("[{}] 윷 던진 결과 응답: {}", playerId, yutResult);
                 getMalsNextPosition(yutResult);
             }
         }
@@ -197,7 +199,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         public void handleFrame(StompHeaders headers, Object payload) {
             GameStompResponse.MalsNextPositionDTO response = (GameStompResponse.MalsNextPositionDTO) payload;
             if(playerId.contains(response.getPlayerId())){
-                log.info("[{}] 말 이동 위치 조회 응답: {}", playerId, gameRoomId);
+//                log.info("[{}] 말 이동 위치 조회 응답: {}", playerId, gameRoomId);
 
                 List<GameStompResponse.MalMoveInfo> moveInfoList = response.getMalList();
                 if(!moveInfoList.isEmpty()){ // 기존의 윷판에 있는 말부터 움직이기
@@ -227,7 +229,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         public void handleFrame(StompHeaders headers, Object payload) {
             GameStompResponse.MoveMalDTO response = (GameStompResponse.MoveMalDTO) payload;
             if(playerId.contains(response.getPlayerId())){{
-                log.info("[{}] 말 이동하기 응답: id:{}, 위치:{} {}", playerId, response.getMalId(), response.getNextPosition(), gameRoomId);
+//                log.info("[{}] 말 이동하기 응답: id:{}, 위치:{} {}", playerId, response.getMalId(), response.getNextPosition(), gameRoomId);
             }}
             else {
                 // 이제 내차례
@@ -249,7 +251,8 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         public void handleFrame(StompHeaders headers, Object payload) {
             GameStompResponse.GameOverDTO response = (GameStompResponse.GameOverDTO) payload;
             isEnd = true;
-            log.info("[{}] 게임 종료-{}: {}, 승자: {}", playerId, isEnd, gameRoomId, response.getWinner());
+            gameThread.notifyEndGame();
+//            log.info("[{}] 게임 종료-{}: {}, 승자: {}", playerId, isEnd, gameRoomId, response.getWinner());
         }
     }
 

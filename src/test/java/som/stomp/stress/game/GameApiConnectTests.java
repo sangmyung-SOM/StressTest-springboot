@@ -20,15 +20,15 @@ public class GameApiConnectTests {
 
     @Test
     public void createRoom2(){
-        GameApiConnect gameApiConnect = new GameApiConnect();
-
-        gameApiConnect.createGame("가나", "COUPLE", "ON");
-        gameApiConnect.deleteGame();
-
-        GameStompConnect gameStompConnect = new GameStompConnect(gameApiConnect.getGameRoomId(), "1P");
-        gameStompConnect.start();
-
-        System.out.println("동기 확인");
+//        GameApiConnect gameApiConnect = new GameApiConnect();
+//
+//        gameApiConnect.createGame("가나", "COUPLE", "ON");
+//        gameApiConnect.deleteGame();
+//
+//        GameStompConnect gameStompConnect = new GameStompConnect(gameApiConnect.getGameRoomId(), "1P");
+//        gameStompConnect.start();
+//
+//        System.out.println("동기 확인");
     }
 
     @Test

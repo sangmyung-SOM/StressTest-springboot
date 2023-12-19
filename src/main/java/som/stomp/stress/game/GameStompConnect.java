@@ -14,13 +14,13 @@ public class GameStompConnect {
     private String playerId;
 
 
-    public GameStompConnect(String gameRoomId, String playerId){
+    public GameStompConnect(String gameRoomId, String playerId, GameThread gameThread){
         this.gameRoomId = gameRoomId;
         this.playerId = playerId;
 
         WebSocketClient webSocketClient = new StandardWebSocketClient();
         this.stompClient = new WebSocketStompClient(webSocketClient);
-        this.stompSessionHandler =  new GameStompSessionHandler(gameRoomId, playerId);
+        this.stompSessionHandler =  new GameStompSessionHandler(gameRoomId, playerId, gameThread);
     }
 
     public void start(){
