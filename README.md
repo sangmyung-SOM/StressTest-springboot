@@ -10,7 +10,17 @@ game 패키지에 있는 클래스들이 핵심입니다. 나머지는 대부분
 
 ## 실행하는 법
 스프링부트 실행시킨 후  
-localhost:8090/test/5 여기로 get 요청 하시면 게임 100개 생성해 플레이하게 됩니다.
+TestController에 있는 API 요청을 확인후 필요에 맞게 호출하면 됩니다.
   
+주요 메소드는  
+1. [GET] /test/game/limit?cnt=  
+    요청한 횟수만큼 게임 실행
+2. [GET] /test/game/limit/time?cnt=&t=  
+   특정 개수만큼 게임 실행, 게임 한개 생성하는데 time만큼의 딜레이 주기  
+3. [GET] /test/game/count  
+   완료한 게임 개수/생성한 게임 개수 = 성공률을 리턴합니다.
+
+입니다.
+
 만약 스프링부트를 실행시키지 않고, 게임 1개에 대해서만 테스트하려는 상황이면  
-test 폴더의 GameTests 클래스에 있는 메소드 실행시켜도 가능합니다.
+test/game 폴더의 GameTests 클래스에 있는 runOneGame() 메소드 실행시켜도 가능합니다.

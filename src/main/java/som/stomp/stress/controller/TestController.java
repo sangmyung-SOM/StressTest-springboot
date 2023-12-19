@@ -61,7 +61,7 @@ public class TestController {
     }
 
     /**
-     * 특정 개수만큼 게임 실행
+     * 요청한 횟수만큼 게임 실행
      * @param count 게임 횟수
      * @return
      */
@@ -74,7 +74,7 @@ public class TestController {
     }
 
     /**
-     * 특정 개수만큼 게임 실행, 게임 한개 실행하는데 time만큼의 딜레이 주기
+     * 특정 개수만큼 게임 실행, 게임 한개 생성하는데 time만큼의 딜레이 주기
      * @param count 게임 횟수
      * @param time 게임 실행하기 전 delay할 시간
      */
