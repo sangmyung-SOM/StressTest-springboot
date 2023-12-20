@@ -3,6 +3,8 @@ package som.stomp.stress.game;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
+
 @Slf4j
 @NoArgsConstructor
 public class GameThread extends Thread{
@@ -27,6 +29,13 @@ public class GameThread extends Thread{
         if(gameStatistics != null){
             gameStatistics.createGame();
         }
+
+//        try{
+//            Thread.sleep(Duration.ofMinutes(5).toMillis());
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//        }
 
         // 플레이어 2명 생성 & 게임 시작
         try{
@@ -58,10 +67,12 @@ public class GameThread extends Thread{
 
         // 게임 끝 & 게임 삭제
         log.info("[게임끝] 1P: {}, 2P: {}", player1.isEnd(), player2.isEnd());
-        gameApiConnect.deleteGame();
+        player1.unsubscribe();
+        player2.unsubscribe();
         if(gameStatistics != null){
             gameStatistics.gameOver();
         }
+        gameApiConnect.deleteGame();
 
         log.info("thread end");
     }

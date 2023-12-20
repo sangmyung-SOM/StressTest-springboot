@@ -26,6 +26,43 @@ public class TestController {
         TestStompConnect testStompConnect = new TestStompConnect();
 
         testStompConnect.go();
+
+        try{
+            Thread.sleep(1000);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        testStompConnect.unsubscription();
+    }
+
+    /**
+     * stomp 연결 확인하기
+     */
+    @GetMapping("/stomp/limit")
+    public void testStompConnect(@RequestParam("cnt")int count){
+        for(int i=0; i<count; i++){
+            TestStompConnect testStompConnect = new TestStompConnect();
+
+            testStompConnect.go();
+
+            try{
+                Thread.sleep(300);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            testStompConnect.unsubscription();
+        }
+    }
+
+    @GetMapping("/stomp/limit/unsub")
+    public void testStompConnectUnsub(@RequestParam("cnt")int count){
+        for(int i=0; i<count; i++){
+            TestStompConnect testStompConnect = new TestStompConnect();
+
+            testStompConnect.go();
+        }
     }
 
     /**
@@ -37,7 +74,38 @@ public class TestController {
         GameApiConnect gameApiConnect = new GameApiConnect();
 
         gameApiConnect.createGame("가나", "COUPLE", "ON");
+
+        try{
+            Thread.sleep(300);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
         gameApiConnect.deleteGame();
+    }
+
+    /**
+     * API 연결 확인
+     * 게임 생성 및 삭제
+     */
+    @GetMapping("/api/limit")
+    public void testGameCreateAndDelete(@RequestParam("cnt")int count){
+        for(int i=0; i<count; i++){
+            GameApiConnect gameApiConnect = new GameApiConnect();
+
+            gameApiConnect.createGame("가나", "COUPLE", "ON");
+
+            try{
+                Thread.sleep(300);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+
+            gameApiConnect.deleteGame();
+        }
+
     }
 
     /**
@@ -54,6 +122,8 @@ public class TestController {
      */
     @GetMapping("/game/100")
     public void testRun100Game(){
+        gameStatistics.reset();
+
         for(int i=0; i<100; i++){
             GameThread gameThread = new GameThread(gameStatistics);
             gameThread.start();
@@ -67,6 +137,8 @@ public class TestController {
      */
     @GetMapping("/game/limit")
     public void testRunGameToLimit(@RequestParam("cnt") int count){
+        gameStatistics.reset();
+
         for(int i=0; i<count; i++){
             GameThread gameThread = new GameThread(gameStatistics);
             gameThread.start();
@@ -80,6 +152,7 @@ public class TestController {
      */
     @GetMapping("/game/limit/time")
     public void testRunGameToLimit(@RequestParam("cnt") int count, @RequestParam("t") Long time){
+        gameStatistics.reset();
 
         for(int i=0; i<count; i++){
             GameThread gameThread = new GameThread(gameStatistics);

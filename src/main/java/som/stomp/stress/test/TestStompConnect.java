@@ -8,15 +8,22 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 public class TestStompConnect {
 
+    private TestStompSessionHandler handler;
+
     public void go(){
         String url = "ws://localhost:8080/ws";
 
         WebSocketClient webSocketClient = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
         StompSessionHandler stompSessionHandler =  new TestStompSessionHandler();
+        this.handler = (TestStompSessionHandler) stompSessionHandler;
         Object[] urlVariables = {};
 
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         stompClient.connect(url, null, stompSessionHandler, urlVariables);
+    }
+
+    public void unsubscription(){
+        handler.unsubscribe();
     }
 }

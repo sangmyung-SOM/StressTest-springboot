@@ -18,6 +18,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
     private String playerId;
     private Boolean isEnd;
     private GameThread gameThread;
+    private List<StompSession.Subscription> subscriptions ;
 
 
     public GameStompSessionHandler(String gameRoomId, String playerId, GameThread gameThread) {
@@ -25,6 +26,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
         this.playerId = playerId;
         this.isEnd = false;
         this.gameThread = gameThread;
+        this.subscriptions = new ArrayList<>();
     }
 
     @Override
@@ -33,11 +35,21 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
 
         this.session = session;
 
-        session.subscribe("/topic/game/room/"+gameRoomId, new GameStartHandler());
-        session.subscribe("/topic/game/throw/"+gameRoomId, new YutThrowResultHandler());
-        session.subscribe("/topic/game/"+gameRoomId+"/mal", new MalsNextPositionHandler());
-        session.subscribe("/topic/game/"+gameRoomId+"/mal/move", new MoveMalHandler());
-        session.subscribe("/topic/game/"+gameRoomId+"/end", new GameOverHandler());
+        subscriptions.add(
+                session.subscribe("/topic/game/room/"+gameRoomId, new GameStartHandler())
+        );
+        subscriptions.add(
+                session.subscribe("/topic/game/throw/"+gameRoomId, new YutThrowResultHandler())
+        );
+        subscriptions.add(
+                session.subscribe("/topic/game/"+gameRoomId+"/mal", new MalsNextPositionHandler())
+        );
+        subscriptions.add(
+                session.subscribe("/topic/game/"+gameRoomId+"/mal/move", new MoveMalHandler())
+        );
+        subscriptions.add(
+                session.subscribe("/topic/game/"+gameRoomId+"/end", new GameOverHandler())
+        );
 
         enterGame();
     }
@@ -248,11 +260,28 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
 
         @Override
         public void handleFrame(StompHeaders headers, Object payload) {
+//            log.info("[{}] 게임 종료-{}: {}, 승자: {}", playerId, isEnd, gameRoomId, response.getWinner());
             GameStompResponse.GameOverDTO response = (GameStompResponse.GameOverDTO) payload;
             isEnd = true;
             gameThread.notifyGameEnd();
-//            log.info("[{}] 게임 종료-{}: {}, 승자: {}", playerId, isEnd, gameRoomId, response.getWinner());
+            unsubscribe();
         }
+    }
+
+    /**
+     * 모든 구독 끊음.
+     */
+    public synchronized void unsubscribe(){
+        log.info("[{}]: 모든 구독 해제. {}", playerId, gameRoomId);
+        if(subscriptions.isEmpty()){
+            return;
+        }
+
+        for(StompSession.Subscription subscription : subscriptions){
+            subscription.unsubscribe();
+        }
+
+        subscriptions.clear();
     }
 
     private void sleep(Long mills){
@@ -267,7 +296,7 @@ public class GameStompSessionHandler extends StompSessionHandlerAdapter {
      * 랜덤한 시간만큼 sleep
      */
     private void sleepRandom(){
-        int rand = (int)(Math.random() * 2) + 1;
+        int rand = (int)(Math.random() * 4) + 1;
         try {
             Thread.sleep(rand * 1000);
         } catch (Exception e){

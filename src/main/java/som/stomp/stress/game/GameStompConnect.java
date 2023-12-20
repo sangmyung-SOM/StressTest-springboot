@@ -38,4 +38,9 @@ public class GameStompConnect {
         GameStompSessionHandler handler =  (GameStompSessionHandler) stompSessionHandler;
         return handler.isEnd();
     }
+
+    public void unsubscribe(){
+        GameStompSessionHandler handler =  (GameStompSessionHandler) stompSessionHandler;
+        handler.unsubscribe();
+    }
 }

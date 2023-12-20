@@ -7,6 +7,7 @@ import som.stomp.stress.test.dto.StompResponse;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -15,6 +16,7 @@ public class TestStompSessionHandler extends StompSessionHandlerAdapter {
 //    https://velog.io/@limsubin/STOMP-%EA%B5%AC%EC%A1%B0-%EB%B0%8F-Spring-Websocket-Client-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EC%9E%90
 
     private StompSession session;
+    private StompSession.Subscription subscription;
 
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
@@ -23,7 +25,7 @@ public class TestStompSessionHandler extends StompSessionHandlerAdapter {
 
         this.session = session;
 
-        session.subscribe("/topic/test/", new StompFrameHandler() {
+        subscription = session.subscribe("/topic/test/", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return StompResponse.TestDTO.class;
@@ -57,5 +59,10 @@ public class TestStompSessionHandler extends StompSessionHandlerAdapter {
         Map<String, Object> params = new HashMap<>();
         params.put("msg", "가나 테스트" + date.toString());
         session.send("/app/test", params);
+    }
+
+    public void unsubscribe(){
+        log.info("구독 해제 완료");
+        subscription.unsubscribe();
     }
 }
