@@ -1,5 +1,9 @@
 # STOMP-CLIENT 스트레스 테스트
 소중한 멤버쉽 2기에서 진행한 서로알기 윷놀이 프로젝트의 스트레스 테스트용입니다.  
+  
+  [참고 링크]  
+- https://docs.spring.io/spring-framework/reference/web/websocket/stomp/client.html  
+- https://velog.io/@limsubin/STOMP-%EA%B5%AC%EC%A1%B0-%EB%B0%8F-Spring-Websocket-Client-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EC%9E%90
 
 ## 기본 세팅
 - 자바 17 사용
